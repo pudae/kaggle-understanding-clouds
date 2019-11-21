@@ -54,6 +54,7 @@ def build_from_config(config, registry, default_args=None):
     assert isinstance(default_args, dict) or default_args is None
     
     name = config['name']
+    name = name.replace('-', '_')
     obj = registry.get(name)
     if obj is None:
         raise KeyError(f'{name} is not in the {registry.name} registry')

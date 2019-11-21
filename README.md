@@ -23,8 +23,10 @@ pip install -r requirements.txt
 Download and extract *train_images.zip* and *test_images.zip* to *data* directory.
 ```
 $ kaggle competitions download -c understanding_cloud_organization
-$ unzip train_images.zip -d data/train_images
-$ unzip test_images.zip -d data/test_images
+$ unzip understanding_cloud_organization.zip -d data
+$ chmod 644 data/*
+$ unzip data/train_images.zip -d data/train_images
+$ unzip data/test_images.zip -d data/test_images
 ```
 
 ### Generate CSV files

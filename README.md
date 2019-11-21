@@ -56,7 +56,10 @@ $ python run.py swa with config={config_path} swa.num_checkpoint=5 swa.ema=0.33 
 The result will be located in *train_logs/{train_dir}/checkpoint*.
 
 ### Pretrained models
-You can download pretrained model that used for my submission from [link]
+You can download pretrained model that used for my submission from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
+```
+$ kaggle datasets download pudae81/understandingclouds1stplaceweights
+```
 
 ## Inference
 If trained weights are prepared, you can create files that contains class/mask probabilities of images.

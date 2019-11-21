@@ -60,7 +60,8 @@ The result will be located in *train_logs/{train_dir}/checkpoint*.
 ### Pretrained models
 You can download pretrained model that used for my submission from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
 ```
-$ kaggle datasets download pudae81/understandingclouds1stplaceweights
+$ mkdir checkpoints
+$ bash download_pretrained.sh
 ```
 
 ## Inference

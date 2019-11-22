@@ -1,5 +1,5 @@
 # kaggle-understanding-clouds
-Code for 1st place solution in Kaggle Humpback Whale Identification Challange.
+Code for 1st place solution in Kaggle Understanding Clouds from Satellite Images Challenge.
 
 To read the brief description of the solution, please, refer to [the Kaggle post](https://www.kaggle.com/c/understanding_cloud_organization/discussion/118080#latest-678045)
 

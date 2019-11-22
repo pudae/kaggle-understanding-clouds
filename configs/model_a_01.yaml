@@ -1,0 +1,87 @@
+dataset:
+  name: 'CloudDataset'
+  params:
+    idx_fold: 0
+    data_dir: 'data'
+    csv_filename: 'train_700.ver0.csv'
+
+  splits:
+    - mode: 'train'
+      split: 'train'
+    - mode: 'validation'
+      split: 'dev'
+    - mode: 'validation'
+      split: 'test_dev'
+    - mode: 'test'
+      split: 'test'
+
+
+transform:
+  name: 'cloud_transform'
+  num_preprocessor: 8
+  params:
+    resize_to: (384, 576)
+    crop_size: (352, 512)
+
+
+model:
+  name: 'UNet'
+  params:
+    num_classes: 4
+    encoder: 'resnet34'
+    use_cls_head: True
+    out_channels: [128, 64, 32, 32, 16]
+
+
+train:
+  dir: 'train_dirs/model_a_01'
+
+  batch_size: 8
+  gradient_accumulation_step: 1
+  num_epochs: 30
+  no_bias_decay: True
+  encoder_lr_ratio: 0.1
+
+
+evaluation:
+  batch_size: 8
+
+
+loss:
+  name: 'BCEWithLogitsLoss'
+
+
+optimizer:
+  name: 'AdamW'
+  params:
+    lr: 0.00025
+    weight_decay: 0.01
+
+
+scheduler:
+  name: 'OneCycleLR'
+  params:
+    epochs: 30
+    max_lr: [0.00025, 0.00025, 0.000025, 0.000025]
+    pct_start: 0.033
+    steps_per_epoch: 568
+
+
+hooks:
+  metric:
+    name: 'CloudMetricHook'
+
+  loss:
+    name: 'CloudLossHook'
+    params:
+      cls_weight: 0.1
+      ignore_negative: True
+
+  build_model:
+    name: 'UNetModelBuilderHook'
+
+  post_forward:
+    name: 'CloudPostForwardHook'
+
+  write_result:
+    name: 'CloudWriteResultHook'

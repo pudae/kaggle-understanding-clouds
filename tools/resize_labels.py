@@ -52,7 +52,7 @@ df.to_csv(OUTPUT_PATH, index=False)
 
 
 INPUT_PATH = f'data/sample_submission.csv'
-OUTPUT_PATH = f'data/sample_submission_700.ver0.csv'
+OUTPUT_PATH = f'data/sample_submission_700.csv'
 
 df = pd.read_csv(INPUT_PATH)
 df['EncodedPixels'] = df.EncodedPixels.map(resize_label)

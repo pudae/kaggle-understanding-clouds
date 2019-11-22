@@ -1,4 +1,5 @@
 import torch.hub
+import torch.nn as nn
 
 def _resnext101_32xxxd_wsl(name, num_classes=1000):
     model = torch.hub.load('facebookresearch/WSL-Images', name)

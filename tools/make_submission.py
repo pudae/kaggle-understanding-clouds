@@ -76,7 +76,7 @@ def make_submission(input_dirs, cls_thresholds=[0.5,0.5,0.5,0.5], thresholds=[0.
 
         if use_argmax:
             cls_prob = np.sort(predictions.reshape(4,-1), axis=1)
-            cls_prob = np.mean(cls_prob[:,-18000:], axis=1)
+            cls_prob = np.mean(cls_prob[:,-17500:], axis=1)
             cls_scores = (row[['p0', 'p1', 'p2', 'p3']].values * num_cls + cls_prob) / (num_cls + 1)
             cls_scores[np.argmax(cls_scores)] = 1
 
@@ -139,7 +139,6 @@ def main():
                          cls_thresholds=cls_thresholds,
                          thresholds=thresholds,
                          use_argmax=True)
-                         # use_argmax=False) #True)
     df.to_csv(args.output, index=False)
 
 

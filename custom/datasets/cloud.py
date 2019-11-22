@@ -70,7 +70,7 @@ class CloudDataset(Dataset):
         df_examples = df_examples.fillna('')
 
         dev_idx = self.idx_fold
-        test_dev_idx = self.num_fold # -self.idx_fold
+        test_dev_idx = self.num_fold
 
         if self.split == 'test_dev':
             df_examples = df_examples[df_examples.Fold == test_dev_idx]

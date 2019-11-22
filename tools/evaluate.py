@@ -55,11 +55,6 @@ def load_predictions(input_dirs, df_train):
         if os.path.exists(filepath):
             dfs.append(pd.read_csv(filepath, index_col='image_id'))
 
-    # if dfs:
-    #     df = sum(dfs) / len(dfs)
-    # else:
-    #     df = None
-
     ret = []
     cls_records = []
     for i, image_id in tqdm.tqdm(enumerate(image_ids), total=len(image_ids)):
@@ -89,21 +84,18 @@ def load_predictions(input_dirs, df_train):
         cls_records.append(tuple([image_id] + cls_probs))
         del predictions
 
-    # df_seg = pd.DataFrame.from_records(cls_records, columns=['image_id', 'p0', 'p1', 'p2', 'p3'])
-    # df_seg = df_seg.set_index('image_id')
-    # dfs.append(df_seg)
+    df_seg = pd.DataFrame.from_records(cls_records, columns=['image_id', 'p0', 'p1', 'p2', 'p3'])
+    df_seg = df_seg.set_index('image_id')
+    dfs.append(df_seg)
 
     df = sum(dfs) / len(dfs)
-    print('before:', np.sum(df.values))
     df.values[np.arange(df.values.shape[0]), np.argmax(df.values, axis=1)] = 1.0
-    print('after:', np.sum(df.values))
 
     gc.collect()
     return ret, df
 
 
-def evaluate(predictions, df_cls, cls_thresholds=[0.5,0.5,0.5,0.5],
-             thresholds=[0.5,0.5,0.5,0.5], min_sizes=[1,1,1,1]):
+def evaluate(predictions, df_cls, cls_thresholds=[0.5,0.5,0.5,0.5], thresholds=[0.5,0.5,0.5,0.5]):
     image_ids = []
     masks = []
     labels = []
@@ -118,11 +110,10 @@ def evaluate(predictions, df_cls, cls_thresholds=[0.5,0.5,0.5,0.5],
 
         thres = thresholds[cls_id]
         cls_thres = cls_thresholds[cls_id]
-        min_size = min_sizes[cls_id]
 
         cls_prediction = (cls_score > cls_thres)
         mask_prediction = (mask > thres)
-        mask_prediction = np.logical_and(mask_prediction, cls_prediction) #.astype(int)
+        mask_prediction = np.logical_and(mask_prediction, cls_prediction)
 
         image_ids.append(image_id)
         masks.append(mask_prediction)
@@ -188,97 +179,6 @@ def compute_metrics(predicts, labels):
             'tp/tn/fp/fn': [tp,tn,fp,fn]}
 
 
-def find_thres_cls(predictions, df_cls, target_cls_idx):
-    image_ids = []
-    masks = []
-    cls_scores = []
-    labels = []
-
-    for p in predictions:
-        image_id, mask, label = p
-        cls_id = int(image_id[-1:])
-        if cls_id != target_cls_idx:
-            continue
-
-        if df_cls is not None:
-            cls_score = df_cls.loc[image_id[:-2]][f'p{cls_id}']
-        else:
-            cls_score = None
-        image_ids.append(image_id)
-        cls_scores.append(cls_score)
-        masks.append(mask)
-        labels.append(label)
-
-    cls_scores = np.array(cls_scores)
-    masks = np.array(masks)
-    labels = np.array(labels)
-
-    best_thr = 0.5
-    best_cls_thr = 0.7
-    best_score = 0.0
-    best_min_size = 1
-
-    # for cls_thr, thr in tqdm.tqdm(list(itertools.product(np.arange(0.7, 0.95, 0.05),
-    #                                                      np.arange(0.4, 0.50, 0.025)))):
-    # for cls_thr, thr in tqdm.tqdm(list(itertools.product(np.arange(0.65, 0.75, 0.025),
-    for cls_thr, thr in tqdm.tqdm(list(itertools.product(np.arange(0.70, 0.72, 0.005),
-                                                         np.arange(0.40, 0.50, 0.025)))):
-        mask_predictions = (masks > thr)
-        if cls_score is not None:
-            cls_predictions = (cls_scores > cls_thr)
-            mask_predictions = np.logical_and(mask_predictions, cls_predictions[:,None,None])
-        m = compute_metrics(mask_predictions, labels)
-        # print(cls_thr, thr)
-        # print(m)
-        if m['mean_dice'] > best_score:
-            best_thr = thr
-            best_cls_thr = cls_thr
-            best_score = m['mean_dice']
-
-    # for thr in tqdm.tqdm(np.arange(0.5, 0.9, 0.1)):
-    #     mask_predictions = (masks > best_thr)
-
-    #     if cls_score is not None:
-    #         cls_predictions = (cls_scores > thr)
-    #         mask_predictions = np.logical_and(mask_predictions, cls_predictions[:,None,None])
-    #     mask_predictions = mask_predictions
-
-    #     m = compute_metrics(mask_predictions, labels)
-    #     if m['mean_dice'] > best_score:
-    #         best_cls_thr = thr
-    #         best_score = m['mean_dice']
-
-    # for thr in tqdm.tqdm(np.arange(0.2, 0.99, 0.05)):
-    #     mask_predictions = (masks > thr)
-
-    #     if cls_score is not None:
-    #         cls_predictions = (cls_scores > best_cls_thr)
-    #         mask_predictions = np.logical_and(mask_predictions, cls_predictions[:,None,None])
-    #     mask_predictions = mask_predictions
-
-    #     m = compute_metrics(mask_predictions, labels)
-    #     if m['mean_dice'] > best_score:
-    #         best_thr = thr
-    #         best_score = m['mean_dice']
-
-    print(f'best score:{best_score:.04f}, thr:{best_thr:.02f}, cls_thr:{best_cls_thr}')
-    return best_thr, best_min_size, best_cls_thr
-
-
-def find_thres(predictions, df_cls):
-    cls_thresholds = [0.7,0.7,0.7,0.7]
-    thresholds = [0.5,0.5,0.5,0.5]
-    min_sizes = [1,1,1,1]
-
-    for target_cls_idx in range(0,4):
-        t, m, cls_t = find_thres_cls(predictions, df_cls, target_cls_idx)
-        thresholds[target_cls_idx] = t
-        min_sizes[target_cls_idx] = m
-        cls_thresholds[target_cls_idx] = cls_t
-
-    return thresholds, min_sizes, cls_thresholds
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description='evaluate')
     parser.add_argument('--input_dir', dest='input_dir',
@@ -288,7 +188,7 @@ def parse_args():
 
 
 def main():
-    print('evaluate v3')
+    print('evaluate')
     args = parse_args()
 
     df_train = pd.read_csv('data/train.csv')
@@ -306,37 +206,11 @@ def main():
     pred_test_dev, df_cls_test_dev = load_predictions(
             [os.path.join(input_dir, 'test_dev') for input_dir in input_dirs], df_train)
 
-    # cls_thresholds = [0.7,0.7,0.7,0.7]
-    # thresholds = [0.4,0.4,0.4,0.4]
-    # cls_thresholds = [0.7,0.7,0.7,0.7]
-    # thresholds = [0.5,0.5,0.5,0.5]
     cls_thresholds = [0.7,0.7,0.7,0.7]
     thresholds = [0.425,0.425,0.425,0.425]
-    min_sizes = [1,1,1,1]
-    print(thresholds, min_sizes, cls_thresholds)
-    print('before dev:', evaluate(pred_dev, df_cls_dev, thresholds=thresholds, min_sizes=min_sizes, cls_thresholds=cls_thresholds))
-    print('before test_dev:', evaluate(pred_test_dev, df_cls_test_dev, thresholds=thresholds, min_sizes=min_sizes, cls_thresholds=cls_thresholds))
-    return
-
-    # for cls_thres in np.arange(0.70, 0.75, 0.005):
-    #     cls_thresholds = [cls_thres] * 4
-    #     print(thresholds, min_sizes, cls_thresholds)
-    #     print('dev:', evaluate(pred_dev, df_cls_dev, thresholds=thresholds, min_sizes=min_sizes, cls_thresholds=cls_thresholds))
-    #     print('test_dev:', evaluate(pred_test_dev, df_cls_test_dev, thresholds=thresholds, min_sizes=min_sizes, cls_thresholds=cls_thresholds))
-
-    thresholds0, min_sizes0, cls_thresholds0 = find_thres(pred_dev, df_cls_dev)
-    print('best dev:', evaluate(pred_dev, df_cls_dev, thresholds=thresholds0, min_sizes=min_sizes0, cls_thresholds=cls_thresholds0))
-
-    thresholds1, min_sizes1, cls_thresholds1 = find_thres(pred_test_dev, df_cls_test_dev)
-    print('best test_dev:', evaluate(pred_test_dev, df_cls_test_dev, thresholds=thresholds1, min_sizes=min_sizes1, cls_thresholds=cls_thresholds1))
-
-    cls_thresholds = (np.array(cls_thresholds0) + np.array(cls_thresholds1)) / 2
-    thresholds = (np.array(thresholds0) + np.array(thresholds1)) / 2
-    min_sizes = (np.array(min_sizes0) + np.array(min_sizes1)) / 2
-
-    print(thresholds, min_sizes, cls_thresholds)
-    print('after dev:', evaluate(pred_dev, df_cls_dev, thresholds=thresholds, min_sizes=min_sizes, cls_thresholds=cls_thresholds))
-    print('after test_dev:', evaluate(pred_test_dev, df_cls_test_dev, thresholds=thresholds, min_sizes=min_sizes, cls_thresholds=cls_thresholds))
+    print(thresholds, cls_thresholds)
+    print('dev:', evaluate(pred_dev, df_cls_dev, thresholds=thresholds, cls_thresholds=cls_thresholds))
+    print('test_dev:', evaluate(pred_test_dev, df_cls_test_dev, thresholds=thresholds, cls_thresholds=cls_thresholds))
 
 
 if __name__ == '__main__':

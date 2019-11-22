@@ -50,7 +50,7 @@ def copy_last_n_checkpoints(config, n, name):
 def load_checkpoint(model, optimizer, checkpoint):
     print('load checkpoint from', checkpoint)
     checkpoint = torch.load(checkpoint)
-    model.load_state_dict(checkpoint['state_dict'])
+    model.load_state_dict(checkpoint['state_dict'], strict=False)
 
     if optimizer is not None:
         optimizer.load_state_dict(checkpoint['optimizer_dict'])

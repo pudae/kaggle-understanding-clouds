@@ -18,6 +18,7 @@ class ResNetEncoder(nn.Module):
     def __init__(self, backbone, **_):
         super().__init__()
         self.backbone = backbone
+        del self.backbone.fc
 
     def forward(self, x):
         x0 = self.backbone.conv1(x)

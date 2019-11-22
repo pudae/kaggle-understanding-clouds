@@ -23,8 +23,10 @@ pip install -r requirements.txt
 Download and extract *train_images.zip* and *test_images.zip* to *data* directory.
 ```
 $ kaggle competitions download -c understanding_cloud_organization
-$ unzip train_images.zip -d data/train_images
-$ unzip test_images.zip -d data/test_images
+$ unzip understanding_cloud_organization.zip -d data
+$ chmod 644 data/*
+$ unzip data/train_images.zip -d data/train_images
+$ unzip data/test_images.zip -d data/test_images
 ```
 
 ### Generate CSV files
@@ -56,7 +58,11 @@ $ python run.py swa with config={config_path} swa.num_checkpoint=5 swa.ema=0.33 
 The result will be located in *train_logs/{train_dir}/checkpoint*.
 
 ### Pretrained models
-You can download pretrained model that used for my submission from [link]
+You can download pretrained model that used for my submission from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
+```
+$ mkdir checkpoints
+$ bash download_pretrained.sh
+```
 
 ## Inference
 If trained weights are prepared, you can create files that contains class/mask probabilities of images.

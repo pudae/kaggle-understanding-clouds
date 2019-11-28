@@ -52,7 +52,7 @@ $ python run.py train with {config_path} -f
 ### Average weights
 To average weights, run following commands.
 ```
-$ python run.py swa with config={config_path} swa.num_checkpoint=5 swa.ema=0.33 swa.epoch_end=40 -f
+$ python run.py swa with {config_path} swa.num_checkpoint=5 swa.ema=0.33 swa.epoch_end=40 -f
 ```
 
 The result will be located in *train_logs/{train_dir}/checkpoint*.

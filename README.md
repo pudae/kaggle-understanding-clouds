@@ -14,7 +14,7 @@ To reproduce my submission without retraining, do the following steps:
 All requirements should be detailed in requirements.txt. Using Anaconda is strongly recommended.
 ```
 conda create -n cloud python=3.6
-source activate cloud
+conda activate cloud
 pip install -r requirements.txt
 ```
 

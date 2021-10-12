@@ -6,7 +6,7 @@ iterative-stratification==0.1.6
 kaggle==1.5.6
 matplotlib==3.1.1
 numpy==1.17.3
-opencv-python==4.1.1.26
+opencv-python==4.2.0.32
 pandas==0.25.2
 Pillow==6.2.1
 pretrainedmodels==0.7.4

@@ -8,7 +8,7 @@ matplotlib==3.1.1
 numpy==1.17.3
 opencv-python==4.1.1.26
 pandas==0.25.2
-Pillow==6.2.1
+Pillow==9.0.0
 pretrainedmodels==0.7.4
 PyYAML==5.1.2
 sacred==0.8.0
